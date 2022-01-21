@@ -1,6 +1,7 @@
 const express = require("express")
 const cors = require("cors")
 
+
 const app = express()
 
 app.use(cors())
@@ -49,6 +50,26 @@ const generateID = () => {
   const maxID = notes.length > 0 ? Math.max(...notes.map(n => n.id)) : 0
   return maxID + 1
 }
+
+app.put("/api/notes/:id", (request,response) => {
+  const idURL = Number(request.params.id)
+  const noteDB = notes.find(n => n.id === idURL)
+  console.log(noteDB)
+  if (noteDB){
+    const newNote = {
+      content: request.body.content,
+      important: request.body.important || false,
+      date: request.body.date ,
+      id: idURL
+    }
+    notes = notes.map(n => n.id !== idURL ? n : newNote)
+    return response.status(201).json(newNote)
+  }
+  else {
+    return response.status(400).json({error: "Registro no encontrado"})
+  }
+})
+
 
 app.post("/api/notes/", (req, res) => {
   const body = req.body
