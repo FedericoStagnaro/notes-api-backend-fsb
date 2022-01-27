@@ -1,34 +1,46 @@
 const express = require("express")
 const cors = require("cors")
+const mongoose = require("mongoose")
+require("dotenv").config()
+
 
 const app = express()
 
-app.use(cors())
-
-app.use(express.static("build"))
-
+app.use(cors()) // Permite las peticiones de cualquier IP
+app.use(express.static("build"))  // Establece el metodo para el frontend
 app.use(express.json()) // parser para ingresos de datos json
 
-let notes = [
-  {
-    id: 1,
-    content: "HTML is easy",
-    date: "2019-05-30T17:30:31.098Z",
-    important: true
-  },
-  {
-    id: 2,
-    content: "Browser can execute only Javascript",
-    date: "2019-05-30T18:39:34.091Z",
-    important: false
-  },
-  {
-    id: 3,
-    content: "GET and POST are the most important methods of HTTP protocol",
-    date: "2019-05-30T19:20:14.298Z",
-    important: true
+let notes = []
+
+// ============================ DATABASE ========================================
+const db_url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}}@clusterdeprueba.wtvmw.mongodb.net/note-app?retryWrites=true&w=majority`
+mongoose.connect(db_url)
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  date: Date,
+  important: Boolean
+})
+noteSchema.set("toJSON", {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
   }
-]
+})
+
+const Note = mongoose.model("Note", noteSchema)
+
+// =========================== END POINTS =======================================
+
+app.get("/api/notes", (req, res) => {
+  Note
+    .find()
+    .then(notes => {
+      res.json(notes)
+    })
+
+})
 
 app.get("/api/notes/:id", (request, response) => {
   const id = Number(request.params.id)
@@ -41,10 +53,6 @@ app.delete("/api/notes/:id", (req, res) => {
   notes = notes.filter(nota => nota.id !== id)
   console.log(notes)
   res.status(204).end()
-})
-
-app.get("/api/notes", (req, res) => {
-  res.json(notes)
 })
 
 const generateID = () => {
