@@ -2,7 +2,6 @@ const express = require("express")
 const cors = require("cors")
 const mongoose = require("mongoose")
 const Note = require("./models/Note.js")
-const { response } = require("express")
 require("dotenv").config()
 
 
@@ -27,32 +26,33 @@ mongoose
 
 
 
-app.get("/api/notes", (request, response) => {
+app.get("/api/notes", (request, response,next) => {
     Note
         .find()
         .then(notes => {
             response.json(notes)
         })
+        .catch(err => next(err))
 })
 
-app.get("/api/notes/:id", (request, response) => {
+app.get("/api/notes/:id", (request, response,next) => {
     const { id } = request.params
     Note
         .findById(id)
         .then(note => response.json(note))
-        .catch(err => console.log(err))
+        .catch(err => next(err))
 })
 
-app.delete("/api/notes/:id", (request, response) => {
+app.delete("/api/notes/:id", (request, response,next) => {
     const {id} = request.params
     Note
         .findByIdAndDelete(id)
         .then(() =>  response.status(204).end())
-        .catch(err => console.log(err))
+        .catch(err => next(err))
     
 })
 
-app.put("/api/notes/:id", (request,response) => {
+app.put("/api/notes/:id", (request,response,next) => {
     const {id} = request.params
     console.log(id,typeof(id))
     const body = request.body
@@ -62,10 +62,10 @@ app.put("/api/notes/:id", (request,response) => {
     }
     Note.findByIdAndUpdate(id,newNote,{returnDocument: "after"})
         .then(noteUpdated => response.status(200).json(noteUpdated))
-        .catch(err => console.log(err))
+        .catch(err => next(err))
 })
     
-app.post("/api/notes/", (request, response) => {
+app.post("/api/notes/", (request, response,next) => {
     const body = request.body
 
     if (!body.content) {
@@ -77,8 +77,9 @@ app.post("/api/notes/", (request, response) => {
         date: new Date(),
     })
     note.save()
-        .then(noteCreated => response.status(201).json(noteCreated))
-        .catch(err => console.log(err))
+        .then(savedNote => {return savedNote.toJSON()} )
+        .then(savedAndFormatedNote => response.status(201).json(savedAndFormatedNote))
+        .catch(err => next(err))
     
 })
 
@@ -91,9 +92,13 @@ app.use((request,response)=>{
 })
 
 app.use((error,request,response,next) => {
-    if (error.mesage === "CastError"){
-        response.status(400).send({error:"ID malformated...."})
+    
+    if (error.name === "CastError"){
+        response.status(400).send({error:"ID malformated...."})}
+    if(error.name === "ValidationError"){
+        response.status(400).send({error: error.message})
     }
+
     next(error)
 })
 
