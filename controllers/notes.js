@@ -2,6 +2,8 @@ const notesRouter = require("express").Router()
 const { response } = require("express")
 const Note = require("../models/Note")
 
+// ======================= GET =======================
+
 notesRouter.get("/", (request,response,next) => {
     Note
         .find()
@@ -28,6 +30,8 @@ notesRouter.delete("/:id", (request, response,next) => {
     
 })
 
+// ======================= PUT =======================
+
 notesRouter.put("/:id", (request,response,next) => {
 	const {id} = request.params
 	const body = request.body
@@ -35,11 +39,23 @@ notesRouter.put("/:id", (request,response,next) => {
 		content:body.content,
 		important:body.important
 	}
-	Note.findByIdAndUpdate(id,newNote,{returnDocument: "after"})
-		.then(noteUpdated => response.status(200).json(noteUpdated))
-		.catch(err => next(err))
+	Note.findByIdAndUpdate(id,newNote,{returnDocument: "after"})	// findByIDandDelete dont throw an error when the id does not exist
+		.then(resMongo => {
+			if (resMongo) {
+				const noteUpdated = resMongo
+				return response.status(200).json(noteUpdated)} 	// Throw an error
+			else {
+				return next({
+					name: "ID not Founded",
+					message: "Message ...ID not Founded"
+				})}
+		})
+		.catch(err => {
+			next(err)})
 })
     
+// ======================= POST =======================
+
 notesRouter.post("/", (request, response,next) => {
 	const body = request.body
 

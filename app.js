@@ -24,7 +24,7 @@ app.use(cors())                       // Permite las peticiones de cualquier IP
 app.use(express.static("build"))      // Establece el metodo para el frontend
 app.use(express.json())               // Parser para ingresos de datos json
 
-app.use(middleware.requestLogger)
+//app.use(middleware.requestLogger)
 
 // =========================== END POINTS =======================================
 
@@ -32,7 +32,8 @@ app.use("/api/notes",notesRouter)
 
 // ============================ ERROR HANDLER ================================
 
-// app.use(middleware.unknownEndpoint)
-// app.use(middleware.errorHandler)
+
+app.use(middleware.errorHandler)
+app.use(middleware.unknownEndpoint)
 
 module.exports = app
