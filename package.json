@@ -21,6 +21,7 @@
     "custom-env": "^2.0.1",
     "dotenv": "^14.3.2",
     "express": "^4.17.2",
+    "express-async-errors": "^3.1.1",
     "mongoose": "^6.1.8"
   },
   "devDependencies": {

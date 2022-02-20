@@ -6,6 +6,7 @@ const notesRouter = require("./controllers/notes")
 const mongoose = require("mongoose")
 const Note = require("./models/Note.js")
 const middleware = require("./utils/middlewares")
+require('express-async-errors')
 
 const app = express()
 

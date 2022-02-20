@@ -44,16 +44,35 @@ describe('GET /api/notes', () => {
         
 
         const response = await api.get(`/api/notes/${first_note.id}`).expect(200)
-        console.log(response.body)
         expect(response.body).toEqual(notesInDb[0])
 
     })
+
+    test('get one note by a non-existed ID', async () => {
+        const noteNon_existed_id = await helper.nonExistingId()
     
+        const response = await api
+                                .get(`/api/notes/${noteNon_existed_id}`)
+                                .expect(404)
+        
+        console.log(response)
+        expect(response.body).toEqual({error: "Id not founded..."})
+    })
+
+    test('get one note by id malformated', async () => {
+        const id_malformated = "1234"
+
+        const response = await api
+                                .get(`/api/notes/${id_malformated}`)
+                                .expect(400)
+
+        expect(response.body).toEqual({error: "malformatted id"})
+    })
 })
 
 describe('PUT /api/notes/id', () => {
     test('Update an existent note', async ()=>{
-        const notesInDb= await helper.notesInDb()
+        const notesInDb = await helper.notesInDb()
         const noteToUpdate = notesInDb[0]
 
        const  newNote = {
@@ -73,7 +92,7 @@ describe('PUT /api/notes/id', () => {
         const newNote = {
             content: "Updated Note",
             important: true,
-            id: '620edf324a2056c9454e83c7',
+            id: await helper.nonExistingId(),
             date: new Date()
         }
         const id_non_existent = newNote.id
@@ -136,53 +155,49 @@ describe('POST /api/notes', ()=> {
     })
 })
 
-// describe('DELETE /api/notes/id', ()=> {
-//     test('correct id', () => {
-//         const notesInDb= await helper.notesInDb()
-//         const noteToDelete = notesInDb[0]
+describe('DELETE /api/notes/id', ()=> {
 
-//         await api
-//                 .delete(`/api/notes/${noteToDelete.id}`)
-//                 .expect(200)
+    test('correct id', async() => {
+        const notesInDb = await helper.notesInDb()
+        const noteToDelete = notesInDb[0]
+
+        await api
+                .delete(`/api/notes/${noteToDelete.id}`)
+                .expect(204)
         
-//         expect(response.body).toEqual(newNote)
-//     })
+        const notes = await helper.notesInDb()
+        expect(notes).not.toContain(noteToDelete)
+    })
 
-//     test.skip('malformated id', () => {
-//         const notesInDb= await helper.notesInDb()
-//         const noteToUpdate = notesInDb[0]
+    test('malformated id', async () => {
+        const notesBefore = await helper.notesInDb()
+        const noteToDelete = {
+            id: "1234"
+        }
 
-//         newNote = {
-//             ...noteToUpdate,
-//             id: '620ec556206aec8703a067b6'
-//         }
+        await api
+                .delete(`/api/notes/${noteToDelete.id}`)
+                .expect(400)
 
-//         const response = await api
-//                     .put(`/api/notes/${noteToUpdate.id}`)
-//                     .send(newNote)
-//                     .expect(200)
-        
-//         expect(response.body).toEqual(newNote)
-//     })
+        const notesAfter = await helper.notesInDb()
+        expect(notesAfter.length).toBe(notesBefore.length)
+    })
 
-//     test.skip('non-existed id', () => {
-//         const notesInDb= await helper.notesInDb()
-//         const noteToUpdate = notesInDb[0]
+    test('non-existed id', async () => {
+        const notesBefore = await helper.notesInDb()
+        const noteToDelete = {
+            id: '620ec556206aec8703a067b6'
+        }
 
-//         newNote = {
-//             ...noteToUpdate,
-//             id: '620ec556206aec8703a067b6'
-//         }
+        await api
+                .delete(`/api/notes/${noteToDelete.id}`)
+                .expect(404)
 
-//         const response = await api
-//                     .put(`/api/notes/${noteToUpdate.id}`)
-//                     .send(newNote)
-//                     .expect(200)
-        
-//         expect(response.body).toEqual(newNote)
-//     })
+        const notesAfter = await helper.notesInDb()
+        expect(notesAfter.length ).toEqual(notesBefore.length)
+    })
 
-// })
+})
 
 afterAll(async() => {
     await mongoose.connection.close()
