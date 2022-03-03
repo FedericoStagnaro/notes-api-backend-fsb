@@ -8,6 +8,7 @@ const config = require("./utils/config")
 const middleware = require("./utils/middlewares")
 const routerNotes = require("./controllers/notes")
 const routerUser = require('./controllers/users')
+const routerLogin = require('./controllers/login')
 
 const app = express()
 
@@ -30,6 +31,7 @@ app.use(express.json())               // Parser para ingresos de datos json
 
 // =========================== END POINTS =======================================
 
+app.use('/api/login',routerLogin)
 app.use("/api/notes",routerNotes)
 app.use('/api/users',routerUser)
 
