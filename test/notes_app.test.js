@@ -6,20 +6,22 @@ const server = require('../index')
 const mongoose = require('mongoose')
 const Note = require('../models/Note')
 
-const helper = require('./test_helper')
+const helper = require('./test_notes_helper')
 const notesRouter = require('../controllers/notes')
 
 const api = supertest(app)
 
 beforeEach(async ()=> {
     await Note.deleteMany({})
-    let noteObject = new Note(helper.INITIAL_NOTES[0])
-    await noteObject.save()
-    noteObject = new Note(helper.INITIAL_NOTES[1])
-    await noteObject.save()
+    
+    const noteOnjectArray = helper.INITIAL_NOTES.map( note => new Note(note))
+    const promiseArray = noteOnjectArray.map( note => note.save())
+    await Promise.all(promiseArray)
+
+    
 })
 
-describe('GET /api/notes', () => {
+describe.skip('GET /api/notes', () => {
     test('get all notes as JSON' , async () => {
         await api
                  .get('/api/notes')
@@ -55,7 +57,6 @@ describe('GET /api/notes', () => {
                                 .get(`/api/notes/${noteNon_existed_id}`)
                                 .expect(404)
         
-        console.log(response)
         expect(response.body).toEqual({error: "Id not founded..."})
     })
 
@@ -70,7 +71,7 @@ describe('GET /api/notes', () => {
     })
 })
 
-describe('PUT /api/notes/id', () => {
+describe.skip('PUT /api/notes/id', () => {
     test('Update an existent note', async ()=>{
         const notesInDb = await helper.notesInDb()
         const noteToUpdate = notesInDb[0]
@@ -98,7 +99,6 @@ describe('PUT /api/notes/id', () => {
         const id_non_existent = newNote.id
 
         const response = await api.put(`/api/notes/${id_non_existent}`).send(newNote).expect(404)
-        console.log(response.body)
         expect(response.body).toEqual({error: "Id not founded..."})
     
     })
@@ -112,14 +112,12 @@ describe('PUT /api/notes/id', () => {
         }
         const id_non_existent = newNote.id
 
-        
-
         const response = await api.put(`/api/notes/${id_non_existent}`).send(newNote).expect(400)
         expect(response.body).toEqual({error: "malformatted id"})
     })
 })
 
-describe('POST /api/notes', ()=> {
+describe.skip('POST /api/notes', ()=> {
     test('a valid note can be added', async () => {
         const newNote = {
             content: 'async/await simplifies making async calls',
@@ -155,7 +153,7 @@ describe('POST /api/notes', ()=> {
     })
 })
 
-describe('DELETE /api/notes/id', ()=> {
+describe.skip('DELETE /api/notes/id', ()=> {
 
     test('correct id', async() => {
         const notesInDb = await helper.notesInDb()

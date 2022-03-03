@@ -3,7 +3,8 @@ Content-Type: application/json
 
 { 
     "content": "Esta es una nueva nota por rest client VSCODE" ,
-    "important": true
+    "important": true,
+    "userId": "621c420a668b1ad8ef51d0cc"
 }
 
 ###

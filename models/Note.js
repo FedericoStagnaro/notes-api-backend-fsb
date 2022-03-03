@@ -10,7 +10,13 @@ const noteSchema = new mongoose.Schema({
 		type:Date,
 		required:true
 	},
-	important: Boolean
+	important: {
+		type:Boolean
+	},
+	userId: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User',
+	}
 })
 
 noteSchema.set("toJSON", {

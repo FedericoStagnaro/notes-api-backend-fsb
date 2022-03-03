@@ -1,12 +1,13 @@
 const express = require("express")
 const cors = require("cors")
-const logger = require("./utils/logger")
-const config = require("./utils/config")
-const notesRouter = require("./controllers/notes")
+require('express-async-errors')
 const mongoose = require("mongoose")
 const Note = require("./models/Note.js")
+const logger = require("./utils/logger")
+const config = require("./utils/config")
 const middleware = require("./utils/middlewares")
-require('express-async-errors')
+const routerNotes = require("./controllers/notes")
+const routerUser = require('./controllers/users')
 
 const app = express()
 
@@ -29,7 +30,8 @@ app.use(express.json())               // Parser para ingresos de datos json
 
 // =========================== END POINTS =======================================
 
-app.use("/api/notes",notesRouter)
+app.use("/api/notes",routerNotes)
+app.use('/api/users',routerUser)
 
 // ============================ ERROR HANDLER ================================
 
